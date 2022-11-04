@@ -1,3 +1,11 @@
 export default function () {
-  return <div></div>;
+  return <div>abc</div>;
 }
+
+export const getStaticProps = async () => {
+  return {
+    props: {
+      test: "added this stuff",
+    },
+  };
+};
