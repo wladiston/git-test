@@ -1,4 +1,5 @@
 import React from "react";
+import { Timer } from "./timer";
 
 const realEnv = (x: $TSFixMe) => {
   switch (x) {
@@ -13,5 +14,9 @@ const realEnv = (x: $TSFixMe) => {
 };
 
 export const Index = () => {
-  return <div>index</div>;
+  return (
+    <div>
+      <Timer time={"123"} />
+    </div>
+  );
 };
