@@ -1,7 +1,7 @@
 import React from "react";
 
 // react component to show the timer
-export const Timer = ({ time }) => {
+export const Timer = ({ time }: $TSFixMe) => {
   return (
     <div className="timer">
       <div className="text">Time Remaining</div>
