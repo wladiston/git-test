@@ -1,6 +1,6 @@
 import React from "react";
 
-const realEnv = (x) => {
+const realEnv = (x: $TSFixMe) => {
   switch (x) {
     case "app.swanbitcoin.com":
     case "app.prod.swanbitcoin.com":
