@@ -1,12 +1,12 @@
 import React from "react";
 import { Timer } from "./timer";
 
-const realEnv = (x) => {
+const realEnv = (x: $TSFixMe) => {
   switch (x) {
-    case "app.swanbitcoin.com":
-    case "app.prod.swanbitcoin.com":
+    case "app.bitcoin.com":
+    case "app.prod.bitcoin.com":
       return "production";
-    case "app.qa.swanbitcoin.com":
+    case "app.qa.bitcoin.com":
       return "qa";
     default:
       return "dev";
