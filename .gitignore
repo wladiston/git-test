@@ -1,0 +1,21 @@
+*.log
+.DS_Store
+.env.local
+
+# Node
+node_modules
+
+# Build
+/build
+
+# Linting
+.eslintcache
+
+# Testing
+coverage
+
+# Storybook
+storybook-static
+
+# IDEs
+.idea/
