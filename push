@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+set -x
+
+CURRENT_BRANCH_NAME=$(git symbolic-ref --short HEAD)
+TITLE=${1}
+
+SLASHES=${CURRENT_BRANCH_NAME//[^\/]/}
+NUM_SLASHES=${#SLASHES}
+
+EXISTING_REMOTE_BRANCHES=$(git branch -a | grep $CURRENT_BRANCH_NAME | grep remotes/origin | wc -l)
+
+if [[ $EXISTING_REMOTE_BRANCHES -lt 1 ]]; then
+    if [[ -z "$TITLE" ]]; then
+        echo "Usage: tools/push \"title of PR here\""
+        exit 1
+    fi
+fi
+
+if [[ $NUM_SLASHES -ne 1 ]]; then
+    echo "Your branch name should contain exactly one slash: e.g. xx/feat-name where xx are your initials"
+    exit 1
+fi
+
+if [[ "$CURRENT_BRANCH_NAME" = "master" || "$CURRENT_BRANCH_NAME" = "development"  ]]; then
+    echo "You are on the branch ${CURRENT_BRANCH_NAME}. Create and check out a feature branch such as xx/feat-name where xx are your initials"
+    exit 1
+fi
+
+
+UNCOMMITTED=$(git status --porcelain=v1 | grep "M " 2>/dev/null | wc -l)
+
+if [[ $UNCOMMITTED -gt 0 ]]; then
+    echo "Uncomitted changes. Commit or stash them before pushing."
+    exit 1
+fi
+
+QA_TITLE="QA: ${TITLE}"
+PROD_TITLE="Production: ${TITLE}"
+QA_BRANCH=qa/${CURRENT_BRANCH_NAME}
+PROD_BRANCH=deploy/${CURRENT_BRANCH_NAME}
+
+# Push the current branch
+git push -u origin ${CURRENT_BRANCH_NAME} --quiet
+
+# Sync from remote
+git fetch
+
+# Create a qa branch and pr. No-track is important: it prevents pushes from this branch from going directly to the remote development branch!
+git checkout -b ${QA_BRANCH} --no-track origin/development || git checkout ${QA_BRANCH}
+
+git merge -q ${CURRENT_BRANCH_NAME} --no-edit --no-ff
+
+git push -u origin ${QA_BRANCH}
+
+gh pr create -H ${QA_BRANCH} -B development --title "${QA_TITLE}" --body "${QA_TITLE}"
+
+# Create a production branch and pr. No-track is important: it prevents pushes from this branch from going directly to the remote production/master branch!
+git checkout -b ${PROD_BRANCH} --no-track origin/master || git checkout ${PROD_BRANCH}
+
+git merge -q ${CURRENT_BRANCH_NAME} --no-edit --no-ff
+
+git push -u origin ${PROD_BRANCH}
+
+gh pr create -H ${PROD_BRANCH} -B master --title "${PROD_TITLE}" --body "${PROD_TITLE}"
+
+# Go back
+git checkout ${CURRENT_BRANCH_NAME}
+
